@@ -244,3 +244,11 @@ window.addEventListener("load", () => {
   updateExchangeRate();
 });
 
+
+const dateDiv = document.getElementById("date");
+function formatDate(date) {
+  const options = { year: 'numeric', month: 'long', day: 'numeric' };
+  return date.toLocaleDateString('en-US', options);
+}
+
+dateDiv.innerText = formatDate(new Date());

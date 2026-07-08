@@ -1,4 +1,10 @@
 
+#date {
+  font-size: 1.2em;
+  color: #f0dde2;
+  text-shadow: 0 1 10px #685b5b;
+  margin-bottom: 10px;
+}
 
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Manrope:wght@400;500;600;700;800&display=swap');
 
