@@ -252,7 +252,7 @@ const populateDropdowns = () => {
         newOption.value = country.code;
         newOption.dataset.flag = country.flag;
 
-        if (select.name === "from" && country.code === "QAR") {
+        if (select.name === "from" && country.code === "CAD") {
           newOption.selected = true;
         } else if (select.name === "to" && country.code === "NPR") {
           newOption.selected = true;
