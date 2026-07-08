@@ -5,6 +5,68 @@
   text-shadow: 0 1 10px #685b5b;
   margin-bottom: 10px;
 }
+.header {
+  display: flex;
+  justify-content: space-between; /* h2 left, controls right */
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.right-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  color: #00ffff;
+  font-size: 1.5em;
+}
+
+/* Toggle Switch Styling */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 25px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  background-color: #ccc;
+  border-radius: 25px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transition: 0.4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 19px;
+  width: 19px;
+  left: 3px;
+  bottom: 3px;
+  background-color: rgb(205, 249, 255);
+  border-radius: 50%;
+  transition: 0.4s;
+}
+
+/* When checked */
+.switch input:checked + .slider {
+  background-color: #00ff88;
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
 
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Manrope:wght@400;500;600;700;800&display=swap');
 
@@ -230,19 +292,35 @@ form {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--muted);
+  flex: 1; 
+  min-width: 0; /* Prevents flex items from pushing beyond parent boundaries */
 }
 
 .select-container {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 5px;
   padding: 10px 12px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
   background: var(--panel-light);
   border: 1px solid var(--panel-border);
   border-radius: 10px;
   transition: border-color 0.25s var(--ease), transform 0.2s var(--ease);
 }
-
+.select-container select {
+  width: 100%;
+  font-size: 0.85rem; /* Reduced font size slightly so full text fits better */
+  padding: 4px 6px;   /* Compact padding */
+  outline: none;
+  border: none;
+  background: transparent;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Truncates text with '...' if it ever overflows */
+  cursor: pointer;
+}
 .select-container:hover {
   border-color: var(--teal-dim);
   transform: translateY(-1px);

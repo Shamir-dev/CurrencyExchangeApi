@@ -158,33 +158,116 @@ const countryList = { // form maps
   ZAR: "ZA",
   ZMK: "ZM",
   ZWD: "ZW",
-}
+};
+
+// Top 20 Remittance Countries for Nepal Mode
+const remittanceCountries = [
+  { name: "Nepal", flag: "NP", code: "NPR" },
+  { name: "Europe (Eurozone)", flag: "EU", code: "EUR" }, // Added Europe Euro
+  { name: "India", flag: "IN", code: "INR" },
+  { name: "Qatar", flag: "QA", code: "QAR" },
+  { name: "Saudi Arabia", flag: "SA", code: "SAR" },
+  { name: "United Arab Emirates", flag: "AE", code: "AED" },
+  { name: "Kuwait", flag: "KW", code: "KWD" },
+  { name: "Malaysia", flag: "MY", code: "MYR" },
+  { name: "South Korea", flag: "KR", code: "KRW" },
+  { name: "Japan", flag: "JP", code: "JPY" },
+  { name: "United States", flag: "US", code: "USD" },
+  { name: "United Kingdom", flag: "GB", code: "GBP" },
+  { name: "Australia", flag: "AU", code: "AUD" },
+  { name: "Canada", flag: "CA", code: "CAD" },
+  { name: "Oman", flag: "OM", code: "OMR" },
+  { name: "Bahrain", flag: "BH", code: "BHD" },
+  { name: "Israel", flag: "IL", code: "ILS" },
+  { name: "Germany", flag: "DE", code: "EUR" },
+  { name: "Italy", flag: "IT", code: "EUR" },
+  { name: "Spain", flag: "ES", code: "EUR" },
+  { name: "Cyprus", flag: "CY", code: "EUR" },
+  { name: "Portugal", flag: "PT", code: "EUR" },
+  { name: "Maldives", flag: "MV", code: "MVR" },
+  { name: "Singapore", flag: "SG", code: "SGD" },
+  { name: "New Zealand", flag: "NZ", code: "NZD" },
+  { name: "Poland", flag: "PL", code: "PLN" },
+  { name: "Romania", flag: "RO", code: "RON" },
+  { name: "France", flag: "FR", code: "EUR" },
+  { name: "Netherlands", flag: "NL", code: "EUR" },
+  { name: "Thailand", flag: "TH", code: "THB" },
+  { name: "China", flag: "CN", code: "CNY" }
+];
 
 const BASE_URL =
   "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1";
 
 const dropdown = document.querySelectorAll("select");   
 const btn = document.querySelector("button");
-const fromCurr = document.querySelector(".from select"); // FIXED name
+const fromCurr = document.querySelector(".from select");
 const toCurr = document.querySelector(".to select");
 const msg = document.querySelector(".msg");
+const toggleSwitch = document.getElementById("toggle");
 
+// Get country code for flag mapping
+const getFlagCode = (selectElement) => {
+  const isGlobal = toggleSwitch ? toggleSwitch.checked : false;
+  const selectedCode = selectElement.value;
 
-for (let select of dropdown) {
-  for (let currCode in countryList) {
-    let newOption = document.createElement("option");
-    newOption.innerText = `${currCode} (${countryList[currCode]})`;
-    newOption.value = currCode;
+  if (isGlobal) {
+    return countryList[selectedCode] || "US";
+  } else {
+    const selectedOption = selectElement.options[selectElement.selectedIndex];
+    if (selectedOption && selectedOption.dataset.flag) {
+      return selectedOption.dataset.flag;
+    }
+    const found = remittanceCountries.find((item) => item.code === selectedCode);
+    return found ? found.flag : "NP";
+  }
+};
 
-    if (select.name === "from" && currCode === "USD") {
-      newOption.selected = true;
-    } else if (select.name === "to" && currCode === "NPR") {
-      newOption.selected = true;
+// Populate dropdown list according to toggle mode
+const populateDropdowns = () => {
+  const isGlobal = toggleSwitch ? toggleSwitch.checked : false;
+
+  for (let select of dropdown) {
+    select.innerHTML = ""; // Clear existing static options from HTML
+
+    if (isGlobal) {
+      // Global Mode: All currencies from countryList
+      for (let currCode in countryList) {
+        let newOption = document.createElement("option");
+        newOption.innerText = `${currCode} (${countryList[currCode]})`;
+        newOption.value = currCode;
+
+        if (select.name === "from" && currCode === "USD") {
+          newOption.selected = true;
+        } else if (select.name === "to" && currCode === "NPR") {
+          newOption.selected = true;
+        }
+
+        select.append(newOption);
+      }
+    } else {
+      // Nepal Mode: Top Remittance Countries
+      remittanceCountries.forEach((country) => {
+        let newOption = document.createElement("option");
+        newOption.innerText = `${country.code} - ${country.name}`;
+        newOption.value = country.code;
+        newOption.dataset.flag = country.flag;
+
+        if (select.name === "from" && country.code === "QAR") {
+          newOption.selected = true;
+        } else if (select.name === "to" && country.code === "NPR") {
+          newOption.selected = true;
+        }
+
+        select.append(newOption);
+      });
     }
 
-    select.append(newOption);
+    updateFlag(select);
   }
+};
 
+// Event listener for dropdown changes
+for (let select of dropdown) {
   select.addEventListener("change", (evt) => {
     updateFlag(evt.target);
   });
@@ -194,61 +277,66 @@ const updateExchangeRate = async () => {
   let amount = document.querySelector(".amount input");
   let amtVal = amount.value;
   
-  if (amtVal === "" || amtVal < 1|| isNaN(amount.value) || amount.value.trim() === "") {
+  if (amtVal === "" || amtVal < 1 || isNaN(amount.value) || amount.value.trim() === "") {
     amtVal = 1;
     amount.value = "1";
   }
 
-  // // ✅ Check if input is a valid number
-  // if (isNaN(amount.value) || amount.value.trim() === "") {
-  //   msg.innerText = "⚠️ Only numbers allowed in amount section";
-  //   return;
-  // }
-
-  // Build URL using only the "from" currency
   const URL = `${BASE_URL}/currencies/${fromCurr.value.toLowerCase()}.json`;
-  let response = await fetch(URL);
-  let data = await response.json();
-  console.log(URL);
+  try {
+    let response = await fetch(URL);
+    let data = await response.json();
 
-  // Extract the rate for the "to" currency
-  let rate = data[fromCurr.value.toLowerCase()][toCurr.value.toLowerCase()];
-  let finalAmount = amtVal * rate;
-  msg.innerText = `${amtVal} ${fromCurr.value} = ${finalAmount} ${toCurr.value}`;
- // Show result in the box with id="convertedAmount"
- document.getElementById("convertedAmount").value =
-  `${finalAmount} ${toCurr.value}`;
-  // show input number with currency code
- let text = document.getElementById("amount");
-text.value = `${amtVal} ${fromCurr.value}`;
-
-
+    let rate = data[fromCurr.value.toLowerCase()][toCurr.value.toLowerCase()];
+    let finalAmount = (amtVal * rate).toFixed(2);
+    
+    msg.innerText = `1 ${fromCurr.value} = ${rate} ${toCurr.value}`;
+    
+    // Show converted amount
+    const convertedAmountInput = document.getElementById("convertedAmount");
+    if (convertedAmountInput) {
+      convertedAmountInput.value = `${finalAmount} ${toCurr.value}`;
+    }
+  } catch (error) {
+    msg.innerText = "Error fetching exchange rate";
+  }
 };
 
 const updateFlag = (element) => {
-  let currCode = element.value;
-  let countryCode = countryList[currCode];
+  let countryCode = getFlagCode(element);
   let newSrc = `https://flagcdn.com/48x36/${countryCode.toLowerCase()}.png`;
 
   let img = element.parentElement.querySelector("img");
-  img.src = newSrc;
+  if (img) {
+    img.src = newSrc;
+  }
 };
+
+// Toggle switch listener ( Nepal Mode vs Global Mode )
+if (toggleSwitch) {
+  toggleSwitch.addEventListener("change", () => {
+    populateDropdowns();
+    updateExchangeRate();
+  });
+}
 
 btn.addEventListener("click", (evt) => {
   evt.preventDefault();
-   
   updateExchangeRate();
 });
 
 window.addEventListener("load", () => {
+  populateDropdowns();
   updateExchangeRate();
 });
 
-
+// Date formatting logic
 const dateDiv = document.getElementById("date");
 function formatDate(date) {
   const options = { year: 'numeric', month: 'long', day: 'numeric' };
   return date.toLocaleDateString('en-US', options);
 }
 
-dateDiv.innerText = formatDate(new Date());
+if (dateDiv) {
+  dateDiv.innerText = formatDate(new Date());
+}
