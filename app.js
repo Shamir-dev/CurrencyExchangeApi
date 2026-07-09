@@ -279,7 +279,7 @@ const updateExchangeRate = async () => {
   
   if (amtVal === "" || amtVal < 1 || isNaN(amount.value) || amount.value.trim() === "") {
     amtVal = 1;
-    amount.value = "1";
+  amount.value = `${amtVal} ${fromCurr.value}`;
   }
 
   const URL = `${BASE_URL}/currencies/${fromCurr.value.toLowerCase()}.json`;
@@ -296,6 +296,7 @@ const updateExchangeRate = async () => {
     const convertedAmountInput = document.getElementById("convertedAmount");
     if (convertedAmountInput) {
       convertedAmountInput.value = `${finalAmount} ${toCurr.value}`;
+      amount.value = `${amtVal} ${fromCurr.value}`;
     }
   } catch (error) {
     msg.innerText = "Error fetching exchange rate";
